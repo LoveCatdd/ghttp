@@ -1,54 +1,44 @@
 package ghttp
 
 import (
-	"fmt"
 	"net/http"
-	"strings"
 )
 
-type HandleFunc func(http.ResponseWriter, *http.Request)
+type HandlerFunc func(*Context)
 
 type Engine struct {
-	routers map[string]HandleFunc
+	routers *router
 }
 
 // the constructor of ghttp.Engine
 func New() *Engine {
 	return &Engine{
-		routers: make(map[string]HandleFunc),
+		routers: newRouter(),
 	}
 }
 
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	builder := strings.Builder{}
-	builder.WriteString(req.Method)
-	builder.WriteString("-")
-	builder.WriteString(req.URL.Path)
-	key := builder.String()
-	if handle, ok := engine.routers[key]; ok {
-		handle(w, req)
-	} else {
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, "404 NOT FOUND: %s\n", req.URL)
-	}
+	c := newContext(w, req)
+	engine.routers.handle(c)
 }
 
-func (engine *Engine) addRoute(method string, pattern string, handle HandleFunc) {
-	key := method + "-" + pattern
-	engine.routers[key] = handle
+func (engine *Engine) addRoute(method string, pattern string, handler HandlerFunc) {
+	engine.routers.addRoute(method, pattern, handler)
 }
 
-func (engine *Engine) Get(pattern string, handle HandleFunc) {
-	engine.addRoute("get", pattern, handle)
+func (engine *Engine) Get(pattern string, handler HandlerFunc) {
+	engine.addRoute("get", pattern, handler)
 }
 
-func (engine *Engine) Post(pattern string, handle HandleFunc) {
-	engine.addRoute("post", pattern, handle)
+func (engine *Engine) Post(pattern string, handler HandlerFunc) {
+	engine.addRoute("post", pattern, handler)
 }
 
 func (engine *Engine) Run(addr string, engineSelf http.Handler) (err error) {
 	if engineSelf != nil {
-		return http.ListenAndServe(addr, engineSelf)
+		err = http.ListenAndServe(addr, engineSelf)
+	} else {
+		err = http.ListenAndServe(addr, engine)
 	}
-	return http.ListenAndServe(addr, engine)
+	return
 }
