@@ -22,7 +22,7 @@ func (r *router) addRoute(method string, pattern string, handle HandlerFunc) {
 }
 
 func (r *router) handle(c *Context) {
-	key := utils.Concat(c.Method, c.Req.URL.Path, "-")
+	key := utils.Concat(utils.ToLower(c.Method), utils.ToLower(c.Req.URL.Path), "-")
 	if handler, ok := r.handlers[key]; ok {
 		handler(c)
 	} else {

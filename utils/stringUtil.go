@@ -4,10 +4,6 @@ import "strings"
 
 var buffer strings.Builder
 
-func init() {
-	buffer = strings.Builder{}
-}
-
 func Concat(per, next, pattern string) string {
 	buffer.Reset()
 	buffer.WriteString(per)
@@ -16,4 +12,8 @@ func Concat(per, next, pattern string) string {
 	}
 	buffer.WriteString(next)
 	return buffer.String()
+}
+
+func ToLower(str string) string {
+	return strings.ToLower(str)
 }
