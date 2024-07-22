@@ -21,8 +21,9 @@ func newRouter() *router {
 
 func (r *router) addRoute(method string, pattern string, handle HandlerFunc) {
 	parts := parsePattern(pattern)
+	method = utils.ToLower(method)
 
-	key := utils.Concat(method, utils.ToLower(pattern), "-")
+	key := utils.Concat(method, pattern, "-")
 	_, ok := r.roots[method]
 	if !ok {
 		r.roots[method] = &node{}
@@ -35,12 +36,14 @@ func (r *router) addRoute(method string, pattern string, handle HandlerFunc) {
 func (r *router) handle(c *Context) {
 	n, params := r.getRoute(c.Method, c.Path)
 	if n == nil {
-		c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		c.String(http.StatusNotFound, "404 NOT FOUND : %s\n", c.Path)
 		return
 	}
 
 	c.Params = params
-	key := utils.Concat(utils.ToLower(c.Method), utils.ToLower(n.pattern), "-")
+
+	key := utils.Concat(utils.ToLower(c.Method), n.pattern, "-")
+
 	if handler, ok := r.handlers[key]; ok {
 		handler(c)
 	} else {
@@ -66,7 +69,8 @@ func parsePattern(pattern string) (parts []string) {
 func (r *router) getRoute(method string, path string) (n *node, params map[string]any) {
 	searchParts := parsePattern(path)
 
-	root, ok := r.roots[method]
+	root, ok := r.roots[utils.ToLower(method)]
+
 	if !ok {
 		return nil, nil
 	}

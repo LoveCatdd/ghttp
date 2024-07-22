@@ -22,8 +22,9 @@ func (n *node) matchChild(part string) *node {
 
 // 匹配所有路由节点 用于查找
 func (n *node) matchChildren(part string) (nodes []*node) {
+	nodes = make([]*node, 0)
 	for _, child := range n.children {
-		if child.part == part && child.isWild {
+		if child.part == part || child.isWild {
 			nodes = append(nodes, child)
 		}
 	}
@@ -48,7 +49,7 @@ func (n *node) insert(pattern string, parts []string, idx int) {
 
 // 查找
 func (n *node) search(parts []string, idx int) *node {
-	if len(parts) == idx || strings.HasSuffix(n.part, "*") {
+	if len(parts) == idx || strings.HasPrefix(n.part, "*") {
 		if n.pattern == "" {
 			return nil
 		}
