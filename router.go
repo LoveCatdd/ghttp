@@ -70,7 +70,7 @@ func (r *router) getRoute(method string, path string) (n *node, params map[strin
 	searchParts := parsePattern(path)
 	method = utils.ToLower(method)
 
-	root, ok := r.roots[utils.ToLower(method)]
+	root, ok := r.roots[method]
 
 	if !ok {
 		return nil, nil
