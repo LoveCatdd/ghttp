@@ -68,6 +68,7 @@ func parsePattern(pattern string) (parts []string) {
 
 func (r *router) getRoute(method string, path string) (n *node, params map[string]any) {
 	searchParts := parsePattern(path)
+	method = utils.ToLower(method)
 
 	root, ok := r.roots[utils.ToLower(method)]
 
