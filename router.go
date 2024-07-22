@@ -21,6 +21,7 @@ func newRouter() *router {
 
 func (r *router) addRoute(method string, pattern string, handle HandlerFunc) {
 	parts := parsePattern(pattern)
+	method = utils.ToLower(method)
 
 	key := utils.Concat(method, utils.ToLower(pattern), "-")
 	_, ok := r.roots[method]
@@ -65,6 +66,7 @@ func parsePattern(pattern string) (parts []string) {
 
 func (r *router) getRoute(method string, path string) (n *node, params map[string]any) {
 	searchParts := parsePattern(path)
+	method = utils.ToLower(method)
 
 	root, ok := r.roots[method]
 	if !ok {
