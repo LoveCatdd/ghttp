@@ -43,10 +43,14 @@ func (r *router) handle(c *Context) {
 	c.Params = params
 	key := utils.Concat(utils.ToLower(c.Method), utils.ToLower(n.pattern), "-")
 	if handler, ok := r.handlers[key]; ok {
-		handler(c)
+		c.handlers = append(c.handlers, handler)
 	} else {
-		c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		c.handlers = append(c.handlers, func(c *Context) {
+			c.String(http.StatusNotFound, "404 NOT FOUND: %s\n", c.Path)
+		})
 	}
+
+	c.Next()
 }
 
 // 解析路由路径

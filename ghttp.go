@@ -2,6 +2,7 @@ package ghttp
 
 import (
 	"net/http"
+	"strings"
 )
 
 type HandlerFunc func(*Context)
@@ -23,7 +24,15 @@ func New() *Engine {
 }
 
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	middlewares := make([]HandlerFunc, 0)
+	for _, group := range groups {
+		if strings.HasPrefix(req.URL.Path, group.prefix) {
+			middlewares = append(middlewares, group.middlewares...)
+		}
+	}
 	c := newContext(w, req)
+
+	c.handlers = middlewares
 	engine.routers.handle(c)
 }
 
@@ -69,4 +78,8 @@ func (group *RouterGroup) Get(pattern string, handler HandlerFunc) {
 
 func (group *RouterGroup) Post(pattern string, handler HandlerFunc) {
 	group.routers.addRoute("post", pattern, handler)
+}
+
+func (group *RouterGroup) Use(middlewares ...HandlerFunc) {
+	group.middlewares = append(group.middlewares, middlewares...)
 }
